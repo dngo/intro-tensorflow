@@ -65,6 +65,6 @@ train_generator = train_datagen.flow_from_directory(
 history = model.fit_generator(
       train_generator,
       steps_per_epoch=8,  
-      epochs=20,
+      epochs=100,
       verbose=1)
 

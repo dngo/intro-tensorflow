@@ -85,7 +85,7 @@ train_generator = train_datagen.flow_from_directory(
 
 history = model.fit_generator(
       train_generator,
-      steps_per_epoch=8,  
+      steps_per_epoch=8,
       epochs=1,
       verbose=1)
 
@@ -94,7 +94,7 @@ import numpy as np
 from tensorflow.keras.preprocessing import image
 
 files = [
-  '/home/david/Desktop/horse.webp',
+  '/home/david/Desktop/horse1.jpeg',
   '/home/david/Desktop/horse2.jpeg',
   '/home/david/Desktop/david.jpg',
   '/home/david/Desktop/human01-01.png',
@@ -104,7 +104,7 @@ for path in files:
   img = image.load_img(path, target_size=(300, 300))
   x = image.img_to_array(img)
   x = np.expand_dims(x, axis=0)
-  
+
   images = np.vstack([x])
   classes = model.predict(images, batch_size=10)
   print(classes[0])
@@ -112,4 +112,4 @@ for path in files:
     print(path + " is a human")
   else:
     print(path + " is a horse")
-  
+

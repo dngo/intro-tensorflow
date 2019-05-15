@@ -33,12 +33,20 @@ print(validation_horse_hames[:10])
 validation_human_names = os.listdir(validation_human_dir)
 print(validation_human_names[:10])
 
-# print('total training horse images:', len(os.listdir(train_horse_dir)))
-# print('total training human images:', len(os.listdir(train_human_dir)))
-# print('total validation horse images:', len(os.listdir(validation_horse_dir)))
-# print('total validation human images:', len(os.listdir(validation_human_dir)))
+print('total training horse images:', len(os.listdir(train_horse_dir)))
+print('total training human images:', len(os.listdir(train_human_dir)))
+print('total validation horse images:', len(os.listdir(validation_horse_dir)))
+print('total validation human images:', len(os.listdir(validation_human_dir)))
 
 import tensorflow as tf
+
+class myCallback(tf.keras.callbacks.Callback):
+  def on_epoch_end(self, epoch, logs={}):
+    if(logs.get('acc') > 0.95):
+      print("\nReached 98% accuracy so cancelling training!")
+      self.model.stop_training = True
+callbacks = myCallback()
+
 model = tf.keras.models.Sequential([
     # Note the input shape is the desired size of the image 300x300 with 3 bytes color
     # This is the first convolution
@@ -100,20 +108,18 @@ history = model.fit_generator(
       epochs=10,
       verbose=1,
       validation_data = validation_generator,
-      validation_steps=8)
-
+      validation_steps=8,
+      callbacks=[callbacks])
 
 import numpy as np
 from tensorflow.keras.preprocessing import image
 
-files = [
-  '/home/david/Desktop/horse1.jpeg',
-  '/home/david/Desktop/horse2.jpeg',
-  '/home/david/Desktop/david.jpg',
-  '/home/david/Desktop/human01-01.png',
-]
+from pathlib import Path
 
-for path in files:
+pathlist = Path('/home/david/Desktop/dataset').glob('**/*')
+
+for path_obj in pathlist:
+  path = str(path_obj)
   img = image.load_img(path, target_size=(300, 300))
   x = image.img_to_array(img)
   x = np.expand_dims(x, axis=0)

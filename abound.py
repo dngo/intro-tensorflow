@@ -6,18 +6,15 @@ from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from shutil import copyfile
 
-print('products training')
-print(len(os.listdir('/home/david/workspace/s3_assets/products/')))
-
-print('users training')
-print(len(os.listdir('/home/david/workspace/s3_assets/users/')))
+print('products training ' + str(len(os.listdir('/home/david/workspace/s3_assets/products/'))))
+print('users training ' + str(len(os.listdir('/home/david/workspace/s3_assets/users/'))))
 
 try:
     os.mkdir('/tmp/products-v-users')
     os.mkdir('/tmp/products-v-users/training')
-    os.mkdir('/tmp/products-v-users/testing')
     os.mkdir('/tmp/products-v-users/training/products')
     os.mkdir('/tmp/products-v-users/training/users')
+    os.mkdir('/tmp/products-v-users/testing')
     os.mkdir('/tmp/products-v-users/testing/products')
     os.mkdir('/tmp/products-v-users/testing/users')
 except OSError:
@@ -76,14 +73,10 @@ split_size = .9
 split_data(PRODUCT_SOURCE_DIR, TRAINING_PRODUCTS_DIR, TESTING_PRODUCTS_DIR, split_size)
 split_data(USER_SOURCE_DIR, TRAINING_USERS_DIR, TESTING_USERS_DIR, split_size)
 
-print('products training')
-print(len(os.listdir('/tmp/products-v-users/training/products/')))
-print('users training')
-print(len(os.listdir('/tmp/products-v-users/training/users/')))
-print('products testing')
-print(len(os.listdir('/tmp/products-v-users/testing/products/')))
-print('users training')
-print(len(os.listdir('/tmp/products-v-users/testing/users/')))
+print('products training ' + str(len(os.listdir('/tmp/products-v-users/training/products/'))))
+print('users training ' + str(len(os.listdir('/tmp/products-v-users/training/users/'))))
+print('products testing ' + str(len(os.listdir('/tmp/products-v-users/testing/products/'))))
+print('users testing ' + str(len(os.listdir('/tmp/products-v-users/testing/users/'))))
 
 model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(16, (3, 3), activation='relu', input_shape=(150, 150, 3)),
@@ -108,16 +101,16 @@ model = tf.keras.models.Sequential([
 model.compile(optimizer=RMSprop(lr=0.001), loss='binary_crossentropy', metrics=['acc'])
 
 TRAINING_DIR =  "/tmp/products-v-users/training"
-# train_datagen = ImageDataGenerator(rescale = 1/255,
-#                                    rotation_range = 40,
-#                                    width_shift_range = 0.2,
-#                                    height_shift_range = 0.2,
-#                                    shear_range = 0.2,
-#                                    zoom_range = 0.2,
-#                                    horizontal_flip = True)
-train_datagen = ImageDataGenerator(rescale=1/255)
+train_datagen = ImageDataGenerator(rescale = 1/255,
+                                   rotation_range = 40,
+                                   width_shift_range = 0.2,
+                                   height_shift_range = 0.2,
+                                   shear_range = 0.2,
+                                   zoom_range = 0.2,
+                                   horizontal_flip = True)
+# train_datagen = ImageDataGenerator(rescale=1/255)
 train_generator = train_datagen.flow_from_directory(TRAINING_DIR,
-                                                    batch_size=100,
+                                                    batch_size=10,
                                                     class_mode='binary',
                                                     target_size=(150, 150))
 
@@ -125,15 +118,17 @@ train_generator = train_datagen.flow_from_directory(TRAINING_DIR,
 VALIDATION_DIR = "/tmp/products-v-users/testing/"
 validation_datagen = ImageDataGenerator(rescale=1/255)
 validation_generator = train_datagen.flow_from_directory(VALIDATION_DIR,
-                                                    batch_size=100,
+                                                    batch_size=10,
                                                     class_mode='binary',
                                                     target_size=(150, 150))
 
 history = model.fit_generator(train_generator,
-                              #epochs=20,
-                              epochs=14,
+                              epochs=20,
                               verbose=1,
                               validation_data=validation_generator)
+
+model.save('abound.h5')
+model = tf.keras.models.load_model('abound.h5')
 
 import numpy as np
 from tensorflow.keras.preprocessing import image
